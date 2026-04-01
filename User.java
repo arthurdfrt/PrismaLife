@@ -3,7 +3,7 @@ public class User {
     private String name;
     private String email;
     public String password;
-    private TodoList myTasks;
+    private TaskList myTasks;
     
     //////////////////////////////////////
     
@@ -11,12 +11,12 @@ public class User {
         this.id = id;
         this.name = name;
         this.email = email;
-        this.myTasks = new TodoList();
+        this.myTasks = new TaskList();
     }
 
     //////////////////////////////////////
 
-    public TodoList getMyTasks(){
+    public TaskList getMyTasks(){
         return myTasks;
     }
 

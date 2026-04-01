@@ -1,9 +1,13 @@
+import java.util.List;
+import java.util.ArrayList;
+
 public class Task {
     private int id;
     private String taskContent;
     private boolean isDone;
     private int date;
     private String cost;
+    private List<SubTask> subTasks;
 
     //////////////////////////////////////
     
@@ -13,8 +17,15 @@ public class Task {
         this.isDone = false;
         this.date = date;
         this.cost = cost;
+        this.subTasks = new ArrayList<>();
     }
 
+    public Task(int id, String content){
+        this.id = id;
+        this.taskContent = content;
+        this.isDone = false;
+        this.subTasks = new ArrayList<>();
+    }
     /////////////////////////////////////
     
     public void markAsDone(){

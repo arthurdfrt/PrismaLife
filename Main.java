@@ -8,7 +8,7 @@ public class Main {
 
         User loggedUser = registry.findByEmail("arthur@email.com");
 
-        TodoList mylist = new TodoList();
+        TaskList mylist = new TaskList();
 
         if (loggedUser != null) {
 
