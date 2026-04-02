@@ -36,12 +36,18 @@ public class User {
     public List<LifeArea> getSilos() {
         return silos;
     }
-
     public String getName() {
         return name;
     }
-
     public String getEmail() {
         return email;
+    }
+    public LifeArea getSiloByName(String siloName){
+        for (LifeArea silo : this.silos) {
+            if (silo.getName().equalsIgnoreCase(siloName)) {
+                return silo;
+            }
+        }
+        return null;
     }
 }

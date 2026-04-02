@@ -12,7 +12,7 @@ public class TaskList {
 
     //////////////////////////////////////
 
-    public void createTask(Task newTask){
+    public void addTask(Task newTask){
         tasks.add(newTask);
     }
 
