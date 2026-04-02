@@ -1,9 +1,10 @@
-# 🚀 Life Manager CLI
+# 📝 Life Manager
 
 A robust task management system built with **Java**, focusing on the "Silo" organization method (Life Areas). This project serves as a practical implementation of **Object-Oriented Programming (OOP)** principles to create a scalable and clean architecture.
 
-> [!IMPORTANT]  
-> **Status: Early Development (WIP)** > This project is currently in its initial phase. Core architecture and CLI navigation are implemented, but features like persistent storage (Database/JSON) and advanced task filtering are still under development.
+> [!NOTE]
+> **Project Status: Backend Validation Phase**
+> The current CLI (Command Line Interface) is a **temporary testing tool** used to validate the business logic, class relationships, and data flow. The system architecture is being developed with a clear separation of concerns, preparing it for future integration with a **Web Frontend** or **Mobile Interface**.
 
 ## 🛠️ Current Features
 - **User Management:** Mock login and user retrieval via `UserRegistry`.
