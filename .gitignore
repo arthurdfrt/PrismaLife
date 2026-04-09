@@ -1,1 +1,10 @@
+#Compilação
+bin/
+out/
 *.class
+
+#IDEs
+/.idea/
+
+#Sistema
+.DS_Store
