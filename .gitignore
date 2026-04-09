@@ -5,6 +5,7 @@ out/
 
 #IDEs
 /.idea/
+/PrismaLife.iml
 
 #Sistema
 .DS_Store
