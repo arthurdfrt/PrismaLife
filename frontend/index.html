@@ -1,47 +1,105 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PrismaLife</title>
+    <title>PrismaLife | Dashboard</title>
     <link rel="stylesheet" href="style.css">
 </head>
-
 <body>
-    <div class="app-container">
-        <aside class="sidebar">
-            <h2>Meus Silos</h2>
-            <ul id="silo-list">
-                <li class="active">Trabalho</li>
-                <li>Faculdade</li>
-                <li>Pessoal</li>
-            </ul>
-            <button id="btn-new-silo">+ Nova Área</button>
-        </aside>
 
-        <main class="main-content">
-            <header>
-                <h1 id="current-silo-title">Trabalho</h1>
-                <p>Gerencie suas tarefas desta área.</p>
+<div class="app-layout">
+
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <h1>💎 PrismaLife</h1>
+            <p>Nível 1 - Iniciante</p>
+        </div>
+
+        <nav class="sidebar-menu">
+            <a href="#" class="active">📝 Nova Missão</a>
+            <a href="#">📜 Quadro Ativo</a>
+            <a href="#">⛅ Someday (Cemitério)</a>
+            <a href="#">📊 Radar de Atributos</a>
+        </nav>
+    </aside>
+
+    <main class="main-content">
+        <div class="center-wrapper">
+
+            <header class="content-header">
+                <h2>Painel de Controle</h2>
+                <p>O que vamos conquistar hoje?</p>
             </header>
 
-            <div class="task-input-area">
-                <input type="text" id="new-task-input" placeholder="O que precisa ser feito?">
-                <button id="btn-add-task">Adicionar</button>
+            <div class="task-board">
+                <h2>📜 Suas Missões Ativas</h2>
+                <ul id="task-list">
+                </ul>
             </div>
 
-            <ul id="task-list">
-                <li>
-                    <input type="checkbox" id="task1">
-                    <label for="task1">Terminar relatório de vendas</label>
-                    <button class="btn-delete">🗑️</button>
-                </li>
-            </ul>
-        </main>
-    </div>
+            <div class="task-creator-panel" id="task-panel">
 
-    <script src="main.js"></script>
+                <div class="panel-trigger">
+                    <span class="plus-icon">+</span>
+                    <span class="trigger-text">Nova Tarefa</span>
+                </div>
+
+                <div class="panel-form">
+                    <input type="text" id="new-task-input" placeholder="Qual é a sua próxima missão?">
+
+                    <div class="options-grid">
+                        <div class="input-group">
+                            <label>Área da Vida (Silo)</label>
+                            <select id="task-silo">
+                                <option value="faculdade">🎓 Faculdade</option>
+                                <option value="trabalho">💼 Trabalho</option>
+                                <option value="saude">🍎 Saúde</option>
+                                <option value="projetos">🚀 Projetos Pessoais</option>
+                            </select>
+                        </div>
+
+                        <div class="input-group">
+                            <label>Custo de Energia</label>
+                            <select id="task-energy">
+                                <option value="low">🟢 Baixo (Rápido/Fácil)</option>
+                                <option value="medium" selected>🟡 Médio</option>
+                                <option value="high">🔴 Alto (Foco Total)</option>
+                            </select>
+                        </div>
+
+                        <div class="input-group checkbox-group">
+                            <label><input type="checkbox" id="task-urgent"> 🔥 É Urgente?</label>
+                            <label><input type="checkbox" id="task-important"> ⭐ É Importante?</label>
+                        </div>
+
+                        <div class="input-group">
+                            <label>
+                                <input type="checkbox" id="task-someday"> ⛅ Someday (Talvez)
+                            </label>
+                            <input type="date" id="task-date">
+                        </div>
+
+                        <div class="input-group full-width">
+                            <label>Link / Referência</label>
+                            <input type="url" id="task-link" placeholder="https://...">
+                        </div>
+                    </div>
+
+                    <div class="subtasks-section">
+                        <label class="section-label">Subtarefas (Passo a passo)</label>
+                        <div class="subtask-input-area">
+                            <input type="text" id="subtask-input" placeholder="Adicionar um sub-passo...">
+                            <button id="btn-add-subtask" type="button">➕</button>
+                        </div>
+                        <ul id="visual-subtask-list"></ul>
+                    </div>
+
+                    <div class="panel-actions">
+                        <button id="btn-cancel" type="button" class="btn-ghost">Cancelar</button>
+                        <button id="btn-add-task" class="btn-primary">Salvar no PrismaLife</button>
+                    </div>
+                </div> </div> </div> </main>
+</div> <script src="app.js"></script>
 </body>
-
 </html>
