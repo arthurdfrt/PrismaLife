@@ -94,6 +94,105 @@ body {
     font-weight: bold;
 }
 
+/* --- HEADER DOS SILOS NA SIDEBAR --- */
+.sidebar-section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 15px;
+    margin-bottom: 10px;
+}
+
+.sidebar-section-header span {
+    color: #94a3b8;
+    font-size: 12px;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+#btn-add-silo {
+    background: none;
+    border: none;
+    color: #94a3b8;
+    cursor: pointer;
+    font-size: 20px;
+    transition: color 0.2s, transform 0.2s;
+    line-height: 1;
+}
+
+#btn-add-silo:hover {
+    color: white;
+    transform: scale(1.2);
+}
+
+/* --- FORMULÁRIO DE NOVO SILO (SIDEBAR) --- */
+.new-silo-form {
+    display: none; /* Escondido por padrão */
+    padding: 12px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 8px;
+    margin-bottom: 15px;
+    border: 1px dashed #334155;
+    animation: fadeIn 0.2s ease;
+}
+
+.new-silo-form.show {
+    display: block;
+}
+
+.silo-input {
+    width: 100%;
+    padding: 8px 10px;
+    border-radius: 6px;
+    border: 1px solid #334155;
+    background: #0f172a; /* Fundo mais escuro que a sidebar */
+    color: white;
+    font-size: 14px;
+    margin-bottom: 10px;
+    outline: none;
+    transition: border-color 0.3s;
+}
+
+.silo-input:focus {
+    border-color: #3b82f6;
+}
+
+.silo-form-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.btn-silo-save {
+    flex: 1;
+    padding: 6px;
+    background: #3b82f6;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: bold;
+}
+.btn-silo-save:hover { background: #2563eb; }
+
+.btn-silo-cancel {
+    flex: 1;
+    padding: 6px;
+    background: transparent;
+    color: #94a3b8;
+    border: 1px solid #334155;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 13px;
+}
+.btn-silo-cancel:hover { color: white; border-color: #cbd5e1; }
+
+/* Cor Padrão para Silos Novos (já que eles não têm cor definida ainda) */
+.task-item {
+    border-left: 5px solid #cbd5e1; /* Cinza clarinho padrão */
+}
+
 /* --- ÁREA PRINCIPAL (CONTEÚDO) --- */
 /* A área principal agora precisa de um espaço no fundo para o painel não cobrir a última tarefa */
 .main-content {

@@ -21,10 +21,24 @@
 
             <div class="sidebar-divider" style="margin: 10px 0; border-top: 1px solid rgba(255,255,255,0.1);"></div>
 
-            <a href="#" class="filter-btn" data-silo="faculdade">🎓 Faculdade</a>
-            <a href="#" class="filter-btn" data-silo="trabalho">💼 Trabalho</a>
-            <a href="#" class="filter-btn" data-silo="saude">🍎 Saúde</a>
-            <a href="#" class="filter-btn" data-silo="projetos">🚀 Projetos Pessoais</a>
+            <div class="sidebar-section-header">
+                <span>Silos</span>
+                <button id="btn-add-silo" title="Adicionar novo Silo">+</button>
+            </div>
+
+            <div id="new-silo-form" class="new-silo-form">
+                <div style="display: flex; gap: 8px; margin-bottom: 10px;">
+                    <input type="text" id="new-silo-input" class="silo-input" placeholder="Ex: 💰 Finanças" style="margin-bottom: 0;">
+                    <input type="color" id="new-silo-color" value="#8b5cf6" title="Cor do Silo" style="width: 38px; height: 36px; padding: 0; border: none; border-radius: 6px; cursor: pointer; background: transparent;">
+                </div>
+                <div class="silo-form-actions">
+                    <button id="btn-save-silo" class="btn-silo-save">Salvar</button>
+                    <button id="btn-cancel-silo" class="btn-silo-cancel">Cancelar</button>
+                </div>
+            </div>
+
+            <div id="silos-container" style="display: flex; flex-direction: column; gap: 10px;">
+            </div>
 
             <div class="sidebar-divider" style="margin: 10px 0; border-top: 1px solid rgba(255,255,255,0.1);"></div>
 
@@ -60,10 +74,7 @@
                         <div class="input-group">
                             <label>Área da Vida (Silo)</label>
                             <select id="task-silo">
-                                <option value="faculdade">🎓 Faculdade</option>
-                                <option value="trabalho">💼 Trabalho</option>
-                                <option value="saude">🍎 Saúde</option>
-                                <option value="projetos">🚀 Projetos Pessoais</option>
+                                <option value="">Sem Silo (Geral)</option>
                             </select>
                         </div>
 

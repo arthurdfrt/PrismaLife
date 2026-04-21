@@ -1,10 +1,75 @@
 console.log("PrismaLife Web Inicializado! 💎");
 
+// --- COMUNICAÇÃO COM O JAVA (API) ---
+const API_URL = 'http://localhost:8080/api/tasks';
+const API_SILOS_URL = 'http://localhost:8080/api/silos';
+
 const btnAddTask = document.getElementById('btn-add-task');
 const inputTask = document.getElementById('new-task-input');
 const taskList = document.getElementById('task-list');
 const taskPanel = document.getElementById('task-panel');
 const btnCancel = document.getElementById('btn-cancel');
+
+// --- LÓGICA DE CRIAÇÃO DE NOVO SILO ---
+const btnAddSilo = document.getElementById('btn-add-silo');
+const newSiloForm = document.getElementById('new-silo-form');
+const btnSaveSilo = document.getElementById('btn-save-silo');
+const btnCancelSilo = document.getElementById('btn-cancel-silo');
+const inputSiloName = document.getElementById('new-silo-input');
+const silosContainer = document.getElementById('silos-container');
+const taskSiloSelect = document.getElementById('task-silo');
+
+// Abrir o mini-formulário
+btnAddSilo.addEventListener('click', (e) => {
+    e.preventDefault();
+    newSiloForm.classList.add('show');
+    inputSiloName.focus();
+});
+
+// Fechar o mini-formulário
+btnCancelSilo.addEventListener('click', (e) => {
+    e.preventDefault();
+    newSiloForm.classList.remove('show');
+    inputSiloName.value = "";
+});
+
+// Salvar o Silo
+btnSaveSilo.addEventListener('click', async (e) => {
+    e.preventDefault();
+    const siloText = inputSiloName.value.trim();
+    const siloColor = document.getElementById('new-silo-color').value;
+
+    if (siloText !== "") {
+        const siloId = siloText.toLowerCase().replace(/[\u1000-\uFFFF]+/g, '').trim().replace(/\s+/g, '-');
+
+        const novoSilo = {
+            name: siloText,
+            siloTitle: siloId,
+            color: siloColor
+        };
+
+        try {
+            // Manda pro Java salvar!
+            await fetch(API_SILOS_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(novoSilo)
+            });
+
+            // Limpa e esconde o painel
+            newSiloForm.classList.remove('show');
+            inputSiloName.value = "";
+
+            // Recarrega os silos da tela
+            loadSilos();
+
+        } catch (error) {
+            console.error("Erro ao salvar Silo:", error);
+        }
+    }
+});
+
+// --- LÓGICA DO PAINEL DE TAREFAS ---
 
 // 1. Abrir ao clicar na barra
 taskPanel.addEventListener('click', (e) => {
@@ -23,24 +88,60 @@ btnCancel.addEventListener('click', (e) => {
 
 let activeFilter = 'all';
 
-// Captura todos os botões de filtro da sidebar
-const filter = document.querySelectorAll('.filter-btn');
+// --- DELEGAÇÃO DE EVENTOS DA SIDEBAR ---
+const sidebarMenu = document.querySelector('.sidebar-menu');
 
-filter.forEach(filterBtn => {
-    filterBtn.addEventListener('click', (e) => {
+sidebarMenu.addEventListener('click', (e) => {
+    const filterBtn = e.target.closest('.filter-btn');
+    if (filterBtn) {
         e.preventDefault();
-        filter.forEach(f => f.classList.remove('active'));
+
+        // Estética: Remove 'active' de todos
+        document.querySelectorAll('.filter-btn').forEach(f => f.classList.remove('active'));
         filterBtn.classList.add('active');
+
+        // Lógica: Filtra e recarrega
         activeFilter = filterBtn.getAttribute('data-silo');
         loadTasks();
-    });
+    }
 });
 
-const API_URL = 'http://localhost:8080/api/tasks';
+async function loadSilos() {
+    try {
+        const response = await fetch(API_SILOS_URL);
+        const silos = await response.json();
+
+        // Limpa os containers antes de recriar
+        silosContainer.innerHTML = '';
+        taskSiloSelect.innerHTML = '<option value="">Sem Silo (Geral)</option>';
+
+        silos.forEach(silo => {
+            // 1. Injeta o CSS dinâmico na página para a cor da tarefa
+            const style = document.createElement('style');
+            style.innerHTML = `.task-item.${silo.siloTitle} { border-left: 5px solid ${silo.color} !important; }`;
+            document.head.appendChild(style);
+
+            // 2. Cria o botão na Sidebar
+            const novoLink = document.createElement('a');
+            novoLink.href = "#";
+            novoLink.className = "filter-btn";
+            novoLink.setAttribute("data-silo", silo.siloTitle);
+            novoLink.innerHTML = `<span style="color: ${silo.color}">●</span> ${silo.name}`;
+            silosContainer.appendChild(novoLink);
+
+            // 3. Adiciona na lista de opções (Select)
+            const novaOption = document.createElement('option');
+            novaOption.value = silo.siloTitle;
+            novaOption.textContent = silo.name;
+            taskSiloSelect.appendChild(novaOption);
+        });
+
+    } catch (error) {
+        console.error("Erro ao carregar os Silos do Java:", error);
+    }
+}
 
 async function loadTasks() {
-    // ERRO 1 CORRIGIDO: Removi o fetch duplicado daqui de fora
-
     try {
         const response = await fetch(API_URL);
         let tasks = await response.json();
@@ -56,13 +157,14 @@ async function loadTasks() {
             li.classList.add('task-item');
             if (task.silo) li.classList.add(task.silo);
 
-            // Mapeando a energia corretamente (já com o seu novo nome no Java)
+            // Mapeando a energia corretamente
             let energyHTML = '';
             if (task.energy === 'low') energyHTML = '<span class="energy-badge energy-low">⚡ Baixa</span>';
             else if (task.energy === 'medium') energyHTML = '<span class="energy-badge energy-medium">⚡⚡ Média</span>';
             else if (task.energy === 'high') energyHTML = '<span class="energy-badge energy-high">⚡⚡⚡ Alta</span>';
 
             const siloTagHTML = activeFilter === 'all' ? `<span class="silo-tag">${task.silo || 'Geral'}</span>` : '';
+
             // Montando o HTML da Tarefa
             li.innerHTML = `
                 <div class="task-header">
@@ -127,7 +229,6 @@ async function loadTasks() {
             const checkbox = li.querySelector('.checkbox-done');
             const btnDelete = li.querySelector('.btn-delete');
 
-            // ERRO 2 CORRIGIDO: Usando o ...task para não apagar a energia/silo ao dar check!
             checkbox.addEventListener('change', async (event) => {
                 try {
                     const updatedTask = { ...task, done: event.target.checked };
@@ -159,11 +260,9 @@ async function loadTasks() {
     }
 }
 
-loadTasks();
-
-// ERRO 3 CORRIGIDO: Capturando Energia e Data na hora de salvar!
+// Salvando nova tarefa
 btnAddTask.addEventListener('click', async (e) => {
-    e.stopPropagation(); // Evita que o clique feche o painel acidentalmente
+    e.stopPropagation();
     const taskText = inputTask.value;
 
     if(taskText.trim() !== "") {
@@ -199,3 +298,6 @@ btnAddTask.addEventListener('click', async (e) => {
         alert("Por favor, digite uma missão!");
     }
 });
+
+loadTasks();
+loadSilos();
