@@ -8,29 +8,24 @@ public class Task {
     private String taskContent;
     private boolean done;
     private int date;
-    private String cost;
+    private String energy;
     private List<SubTask> subTasks;
+    private String silo;
 
     //////////////////////////////////////
 
     public Task() {
     }
 
-    public Task(int id, String taskTitle, int date, String cost) {
+    public Task(int id, String taskTitle, String silo, String energy) {
         this.id = id;
         this.taskContent = taskTitle;
         this.done = false;
-        this.date = date;
-        this.cost = cost;
         this.subTasks = new ArrayList<>();
+        this.silo = silo;
+        this.energy = energy;
     }
 
-    public Task(int id, String content){
-        this.id = id;
-        this.taskContent = content;
-        this.done = false;
-        this.subTasks = new ArrayList<>();
-    }
     /////////////////////////////////////
     
     public void markAsDone(){
@@ -58,14 +53,17 @@ public class Task {
         return date;
     }
 
-    public String getCost() {
-        return cost;
+    public String getEnergy() {
+        return energy;
     }
 
     public List<SubTask> getSubTasks() {
         return subTasks;
     }
 
+    public String getSilo() {
+        return silo;
+    }
     ///////////////// Setters ///////////////////
 
     public void setId(int id) {
@@ -84,11 +82,15 @@ public class Task {
         this.date = date;
     }
 
-    public void setCost(String cost) {
-        this.cost = cost;
+    public void setEnergy(String energy) {
+        this.energy = energy;
     }
 
     public void setSubTasks(List<SubTask> subTasks) {
         this.subTasks = subTasks;
+    }
+
+    public void setSilo(String silo) {
+        this.silo = silo;
     }
 }

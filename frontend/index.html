@@ -17,10 +17,18 @@
         </div>
 
         <nav class="sidebar-menu">
-            <a href="#" class="active">📝 Nova Missão</a>
-            <a href="#">📜 Quadro Ativo</a>
-            <a href="#">⛅ Someday (Cemitério)</a>
-            <a href="#">📊 Radar de Atributos</a>
+            <a href="#" class="filter-btn active" data-silo="all">📊 Geral (Dashboard)</a>
+
+            <div class="sidebar-divider" style="margin: 10px 0; border-top: 1px solid rgba(255,255,255,0.1);"></div>
+
+            <a href="#" class="filter-btn" data-silo="faculdade">🎓 Faculdade</a>
+            <a href="#" class="filter-btn" data-silo="trabalho">💼 Trabalho</a>
+            <a href="#" class="filter-btn" data-silo="saude">🍎 Saúde</a>
+            <a href="#" class="filter-btn" data-silo="projetos">🚀 Projetos Pessoais</a>
+
+            <div class="sidebar-divider" style="margin: 10px 0; border-top: 1px solid rgba(255,255,255,0.1);"></div>
+
+            <a href="#" class="filter-btn" data-silo="someday">⛅ Someday</a>
         </nav>
     </aside>
 
@@ -33,7 +41,7 @@
             </header>
 
             <div class="task-board">
-                <h2>📜 Suas Missões Ativas</h2>
+                <h2>📜 Suas Tarefas Ativas</h2>
                 <ul id="task-list">
                 </ul>
             </div>
@@ -46,7 +54,7 @@
                 </div>
 
                 <div class="panel-form">
-                    <input type="text" id="new-task-input" placeholder="Qual é a sua próxima missão?">
+                    <input type="text" id="new-task-input" placeholder="Qual é a sua próxima tarefa?">
 
                     <div class="options-grid">
                         <div class="input-group">
@@ -97,7 +105,7 @@
 
                     <div class="panel-actions">
                         <button id="btn-cancel" type="button" class="btn-ghost">Cancelar</button>
-                        <button id="btn-add-task" class="btn-primary">Salvar no PrismaLife</button>
+                        <button id="btn-add-task" class="btn-primary">Adicionar Tarefa</button>
                     </div>
                 </div> </div> </div> </main>
 </div> <script src="app.js"></script>

@@ -12,9 +12,8 @@ public class TaskController {
     private List<Task> tasks = new ArrayList<>();
 
     public TaskController() {
-        tasks.add(new Task(101, "Integrar front com back"));
-        tasks.add(new Task(102, "Dominar springboot"));
     }
+
     @GetMapping
     public List<Task> getTasks() {
         return tasks;
