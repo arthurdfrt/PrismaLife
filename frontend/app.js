@@ -78,7 +78,6 @@ function updateRadarChart() {
 }
 
 // --- SISTEMA DE XP ---
-// --- SISTEMA DE XP ---
 function addXP(amount, siloId) {
     if (amount === 0) return; // Agora permite números negativos!
 
@@ -225,7 +224,7 @@ taskPanel?.addEventListener('click', async (e) => {
                 depSelect.innerHTML = '';
 
                 // Filtra para não mostrar tarefas que já estão prontas
-                // e nem as que estão no Someday (para manter o foco)
+                // e nem as que estão no Someday
                 const validTasks = allTasks.filter(t => !t.done && !t.someday);
 
                 if (validTasks.length === 0) {
@@ -266,7 +265,6 @@ sidebarMenu?.addEventListener('click', (e) => {
             if (dashboardHeader) dashboardHeader.style.display = 'none';
         } else {
             if (eisenhowerPanel) eisenhowerPanel.style.display = 'flex';
-            // O updateRadarChart() cuida do dashboardHeader baseado no 'all'
         }
 
         loadTasks();
@@ -425,7 +423,6 @@ async function loadTasks() {
                     });
                     const data = await response.json();
 
-                    // MUDANÇA AQUI: Tira o "> 0" e deixa apenas "!= 0"
                     if (data.xpGained !== 0 && data.xpGained !== undefined) {
                         addXP(data.xpGained, data.siloAffected);
                     }
