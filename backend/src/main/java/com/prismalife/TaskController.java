@@ -36,6 +36,10 @@ public class TaskController {
             if (task.getId() == id) {
                 task.setContent(updatedTask.getContent());
                 task.setDone(updatedTask.isDone());
+                task.setDescription(updatedTask.getDescription());
+                task.setSubTasks(updatedTask.getSubTasks());
+                task.setDate(updatedTask.getDate());
+                task.setLink(updatedTask.getLink());
                 return task;
             }
         }

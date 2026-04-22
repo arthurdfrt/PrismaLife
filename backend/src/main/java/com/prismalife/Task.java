@@ -7,32 +7,25 @@ public class Task {
     private int id;
     private String taskContent;
     private boolean done;
-    private int date;
+    private String date;
     private String energy;
     private List<SubTask> subTasks;
     private String silo;
+    private String description;
+    private String link;
 
     //////////////////////////////////////
 
     public Task() {
     }
 
-    public Task(int id, String taskTitle, String silo, String energy) {
+    public Task(int id, String taskTitle, String silo, String energy, String description) {
         this.id = id;
         this.taskContent = taskTitle;
         this.done = false;
         this.subTasks = new ArrayList<>();
         this.silo = silo;
         this.energy = energy;
-    }
-
-    /////////////////////////////////////
-    
-    public void markAsDone(){
-        this.done = true;
-    }
-    public void postPone(int newDate){
-        this.date = newDate;
     }
 
     ///////////////// Getters ///////////////////
@@ -49,7 +42,7 @@ public class Task {
         return done;
     }
 
-    public int getDate() {
+    public String getDate() {
         return date;
     }
 
@@ -63,6 +56,13 @@ public class Task {
 
     public String getSilo() {
         return silo;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+    public String getLink() {
+        return link;
     }
     ///////////////// Setters ///////////////////
 
@@ -78,7 +78,7 @@ public class Task {
         this.done = done;
     }
 
-    public void setDate(int date) {
+    public void setDate(String date) {
         this.date = date;
     }
 
@@ -92,5 +92,12 @@ public class Task {
 
     public void setSilo(String silo) {
         this.silo = silo;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+    public void setLink(String link) {
+        this.link = link;
     }
 }
