@@ -67,7 +67,14 @@
             </header>
 
             <div class="task-board">
+                <div class="task-list-header">
                 <h2>📜 Suas Tarefas Ativas</h2>
+                <div class="eisenhower-filters">
+                    <button class="filter-toggle" id="toggle-urgent" data-type="urgent">🔥 Urgente</button>
+                    <button class="filter-toggle" id="toggle-important" data-type="important">⭐ Importante</button>
+                    <button class="btn-clear-filters" id="btn-clear-eisenhower">🧹</button>
+                </div>
+                </div>
                 <ul id="task-list">
                 </ul>
             </div>
@@ -111,9 +118,15 @@
                             <input type="date" id="task-date">
                         </div>
 
-                        <div class="input-group full-width">
+                        <div class="input-group">
                             <label for="task-link">🔗 Link de Referência</label>
                             <input type="url" id="task-link" placeholder="https://google.com...">
+                        </div>
+
+                        <div class="input-group dependency-section">
+                            <label for="task-dependencies">🔒 Bloqueada por:</label>
+                            <select id="task-dependencies" multiple title="Segure Ctrl para selecionar várias">
+                            </select>
                         </div>
                     </div>
 

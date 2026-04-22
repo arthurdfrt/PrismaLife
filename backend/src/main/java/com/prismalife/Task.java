@@ -13,6 +13,11 @@ public class Task {
     private String silo;
     private String description;
     private String link;
+    private boolean urgent;
+    private boolean important;
+    private boolean someday;
+    private List<Long> dependencies;
+
 
     //////////////////////////////////////
 
@@ -78,9 +83,24 @@ public class Task {
     public String getDescription() {
         return description;
     }
+
     public String getLink() {
         return link;
     }
+
+    public boolean isUrgent() {
+        return urgent;
+    }
+    public boolean isImportant() {
+        return important;
+    }
+    public boolean isSomeday() {
+        return someday;
+    }
+    public List<Long> getDependencies() {
+        return dependencies;
+    }
+
     ///////////////// Setters ///////////////////
 
     public void setId(int id) {
@@ -116,5 +136,18 @@ public class Task {
     }
     public void setLink(String link) {
         this.link = link;
+    }
+
+    public void setUrgent(boolean urgent) {
+        this.urgent = urgent;
+    }
+    public void setImportant(boolean important) {
+        this.important = important;
+    }
+    public void setSomeday(boolean someday) {
+        this.someday = someday;
+    }
+    public void setDependencies(List<Long> dependencies) {
+        this.dependencies = dependencies;
     }
 }

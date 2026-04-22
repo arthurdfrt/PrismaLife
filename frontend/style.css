@@ -195,11 +195,10 @@ body {
 }
 
 /* --- ÁREA PRINCIPAL (CONTEÚDO) --- */
-/* A área principal agora precisa de um espaço no fundo para o painel não cobrir a última tarefa */
 .main-content {
     flex-grow: 1;
     overflow-y: auto;
-    padding: 40px 20px 60px 20px; /* Aumentei o padding-bottom (120px) */
+    padding: 40px 20px 40px 20px;
     display: flex;
     justify-content: center;
 }
@@ -213,6 +212,7 @@ body {
 .task-board {
     flex-grow: 1;
     margin-bottom: 20px;
+    padding-bottom: 20px;
 }
 
 .task-creator-panel {
@@ -237,7 +237,7 @@ body {
 /* 1. O painel começa coladinho no input */
 .task-creator-panel {
     position: sticky;
-    bottom: 20px;
+    bottom: 5px;
     background: var(--bg-card);
     border: 1px solid var(--border);
     border-radius: 12px;
@@ -688,4 +688,103 @@ body {
     width: 100%;
     max-width: 500px;
     height: 100%;
+}
+
+.task-list-header{
+    display: flex;
+    justify-content: space-between; /* Empurra o título pra esquerda e filtros pra direita */
+    align-items: center;
+    margin-bottom: 20px;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    padding-bottom: 10px;
+
+}
+
+.eisenhower-filters {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 15px;
+    align-items: center;
+}
+
+.filter-toggle {
+    background: #ffffff;
+    border: 1px solid #ffffff;
+    color: rgb(207 221 248 / 0, 2);
+    padding: 6px 12px;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-size: 0.85rem;
+}
+
+.filter-toggle.active {
+    background: #3b82f6;
+    color: white;
+    border-color: #60a5fa;
+    box-shadow: 0 0 10px rgba(59, 130, 246, 0.4);
+}
+
+.btn-clear-filters {
+    background: transparent;
+    border: none;
+    /*color: #64748b;*/
+    cursor: pointer;
+    font-size: 0.8rem;
+    text-decoration: underline;
+}
+
+/* --- ESTILO DO SELETOR DE DEPENDÊNCIAS (TEMA CLARO) --- */
+.dependency-section {
+    position: relative;
+}
+
+#task-dependencies {
+    width: 100%;
+    background-color: #ffffff !important;
+    color: #475569;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    padding: 5px;
+    height: 40px;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+/* Garante que o fundo das opções não fique preto */
+#task-dependencies option {
+    background-color: #f8fafc !important;
+    color: #475569;
+    padding: 8px;
+}
+
+/* Quando o usuário clica para selecionar */
+#task-dependencies:focus {
+    height: 120px;
+    position: absolute;
+    z-index: 100;
+    bottom: 0;
+    background-color: #ffffff !important; /* Branco puro no foco para destacar */
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    border-color: #3b82f6;
+    outline: none;
+}
+
+/* Cor do item quando selecionado */
+#task-dependencies option:checked {
+    background-color: #3b82f6 !important;
+    color: white !important;
+}
+
+/* Estilo para a tarefa bloqueada na lista */
+.task-item.is-blocked {
+    opacity: 0.5;
+    filter: grayscale(0.5);
+    background-color: #f1f5f9; /* Tom levemente diferente para mostrar que está inativa */
+    pointer-events: none;
+}
+
+.task-item.is-blocked .checkbox-done {
+    cursor: not-allowed;
 }

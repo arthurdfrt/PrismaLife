@@ -55,6 +55,10 @@ public class TaskController {
                 task.setSubTasks(updatedTask.getSubTasks());
                 task.setDate(updatedTask.getDate());
                 task.setLink(updatedTask.getLink());
+                task.setUrgent(updatedTask.isUrgent());
+                task.setImportant(updatedTask.isImportant());
+                task.setSomeday(updatedTask.isSomeday());
+                task.setDependencies(updatedTask.getDependencies());
 
                 Map<String, Object> response = new HashMap<>();
                 response.put("task", task);

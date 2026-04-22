@@ -15,7 +15,9 @@ const btnCancel = document.getElementById('btn-cancel');
 let totalXP = 0;
 let siloXP = {};
 let lifeChart = null;
-let activeFilter = 'all';
+let activeFilter = 'all'
+let filterUrgent = false;
+let filterImportant = false;
 
 // --- SISTEMA DE GRÁFICO (RADAR) ---
 function updateRadarChart() {
@@ -136,6 +138,33 @@ const inputSiloName = document.getElementById('new-silo-input');
 const silosContainer = document.getElementById('silos-container');
 const taskSiloSelect = document.getElementById('task-silo');
 
+document.getElementById('task-dependencies')?.addEventListener('mousedown', function(e) {
+    if (e.target.tagName === 'OPTION') {
+        e.preventDefault();
+        e.target.selected = !e.target.selected;
+        this.focus();
+        this.dispatchEvent(new Event('change'));
+    }
+});
+document.getElementById('toggle-urgent').addEventListener('click', function() {
+    filterUrgent = !filterUrgent;
+    this.classList.toggle('active');
+    loadTasks();
+});
+document.getElementById('toggle-important').addEventListener('click', function() {
+    filterImportant = !filterImportant;
+    this.classList.toggle('active');
+    loadTasks();
+});
+document.querySelector('.btn-clear-filters')?.addEventListener('click', () => {
+    filterUrgent = false;
+    filterImportant = false;
+    document.getElementById('toggle-urgent').classList.remove('active');
+    document.getElementById('toggle-important').classList.remove('active');
+    loadTasks();
+});
+
+
 btnAddSilo?.addEventListener('click', (e) => {
     e.preventDefault();
     newSiloForm.classList.add('show');
@@ -170,11 +199,38 @@ btnSaveSilo?.addEventListener('click', async (e) => {
     }
 });
 
-// --- UI TAREFAS ---
-taskPanel?.addEventListener('click', (e) => {
+// --- UI TAREFAS (EXPANDIR PAINEL E CARREGAR DEPENDÊNCIAS) ---
+taskPanel?.addEventListener('click', async (e) => {
+    // Só executa se o painel não estiver aberto ainda
     if (!taskPanel.classList.contains('expanded')) {
         taskPanel.classList.add('expanded');
         inputTask.focus();
+
+        // --- BUSCAR TAREFAS PARA O SELETOR ---
+        try {
+            const response = await fetch(API_URL);
+            const allTasks = await response.json();
+            const depSelect = document.getElementById('task-dependencies');
+
+            if (depSelect) {
+                // Limpa o seletor antes de preencher
+                depSelect.innerHTML = '';
+
+                // Filtra para não mostrar tarefas que já estão prontas
+                // e nem as que estão no Someday (para manter o foco)
+                const validTasks = allTasks.filter(t => !t.done && !t.someday);
+
+                if (validTasks.length === 0) {
+                    depSelect.innerHTML = '<option disabled>Nenhuma tarefa disponível</option>';
+                } else {
+                    depSelect.innerHTML = validTasks
+                        .map(t => `<option value="${t.id}">${t.content}</option>`)
+                        .join('');
+                }
+            }
+        } catch (error) {
+            console.error("Erro ao carregar dependências no seletor:", error);
+        }
     }
 });
 
@@ -193,6 +249,18 @@ sidebarMenu?.addEventListener('click', (e) => {
         document.querySelectorAll('.filter-btn').forEach(f => f.classList.remove('active'));
         filterBtn.classList.add('active');
         activeFilter = filterBtn.getAttribute('data-silo');
+
+        const eisenhowerPanel = document.querySelector('.eisenhower-filters');
+        const dashboardHeader = document.getElementById('dashboard-header');
+
+        if (activeFilter === 'someday') {
+            if (eisenhowerPanel) eisenhowerPanel.style.display = 'none';
+            if (dashboardHeader) dashboardHeader.style.display = 'none';
+        } else {
+            if (eisenhowerPanel) eisenhowerPanel.style.display = 'flex';
+            // O updateRadarChart() cuida do dashboardHeader baseado no 'all'
+        }
+
         loadTasks();
         updateRadarChart();
     }
@@ -230,13 +298,47 @@ async function loadTasks() {
         const response = await fetch(API_URL);
         let tasks = await response.json();
 
-        if (activeFilter !== 'all') tasks = tasks.filter(t => t.silo === activeFilter);
+        const mainTitle = document.querySelector('.task-board h2');
+        if (mainTitle) {
+            if (activeFilter === 'all') {
+                mainTitle.innerHTML = "📜 Suas Tarefas Ativas";
+            } else if (activeFilter === 'someday') {
+                mainTitle.innerHTML = "⛅ Someday & Ideias";
+            } else {
+                const activeSiloBtn = document.querySelector(`.filter-btn[data-silo="${activeFilter}"]`);
+                if (activeSiloBtn) {
+                    const siloName = activeSiloBtn.textContent.replace('●', '').trim();
+                    mainTitle.innerHTML = `${siloName}`;
+                }
+            }
+        }
+
+        // Filtros de Aba
+        if (activeFilter === 'someday') {
+            tasks = tasks.filter(t => t.someday === true);
+        } else {
+            tasks = tasks.filter(t => t.someday === false || t.someday === undefined);
+            if (activeFilter !== 'all') {
+                tasks = tasks.filter(t => t.silo === activeFilter);
+            }
+        }
+
+        // Filtros Eisenhower
+        if (filterUrgent) tasks = tasks.filter(t => t.urgent === true);
+        if (filterImportant) tasks = tasks.filter(t => t.important === true);
+
         taskList.innerHTML = '';
 
         tasks.forEach(task => {
+            const isBlocked = task.dependencies && task.dependencies.length > 0 &&
+                tasks.some(t =>
+                    task.dependencies.map(Number).includes(Number(t.id)) && !t.done
+                );
+
             const li = document.createElement('li');
             li.classList.add('task-item');
             if (task.silo) li.classList.add(task.silo);
+            if (isBlocked) li.classList.add('is-blocked');
 
             let energyHTML = '';
             if (task.energy === 'low') energyHTML = '<span class="energy-badge energy-low">⚡ Baixa</span>';
@@ -247,9 +349,12 @@ async function loadTasks() {
 
             li.innerHTML = `
                 <div class="task-header">
-                    <input type="checkbox" class="checkbox-done" ${task.done ? 'checked' : ''}>
+                    <input type="checkbox" class="checkbox-done" ${task.done ? 'checked' : ''} ${isBlocked ? 'disabled' : ''}>
                     <div style="flex-grow: 1; display: flex; align-items: center;">
-                        <label style="${task.done ? 'text-decoration: line-through; opacity: 0.6;' : ''}">${task.content}</label>
+                        <label style="${task.done ? 'text-decoration: line-through; opacity: 0.6;' : ''}">
+                            ${isBlocked ? '🔒 ' : ''}${task.content}
+                        </label>
+                        ${isBlocked ? '<span class="silo-tag" style="background: #fee2e2; color: #dc2626;">Bloqueada</span>' : ''}
                         ${siloTagHTML} ${energyHTML}
                     </div>
                     <div class="task-actions">
@@ -302,7 +407,6 @@ async function loadTasks() {
             li.querySelector('.btn-details').onclick = () => togglePanel(detailsPanel);
             li.querySelector('.btn-subtasks').onclick = () => togglePanel(subtasksPanel);
 
-            // Checkbox principal (XP)
             li.querySelector('.checkbox-done').addEventListener('change', async (e) => {
                 const isChecked = e.target.checked;
                 try {
@@ -322,7 +426,41 @@ async function loadTasks() {
                 loadTasks();
             };
 
-            taskList.appendChild(li);
+// --- LÓGICA DE ADICIONAR SUBTAREFA ---
+            const btnAddSub = li.querySelector('.btn-add-sub-inline');
+            const inputSub = li.querySelector('.new-subtask-text');
+
+            btnAddSub.onclick = async () => {
+                const subText = inputSub.value.trim();
+                if (subText) {
+                    if (!task.subTasks) task.subTasks = [];
+                    task.subTasks.push({ title: subText, done: false });
+
+                    await fetch(`${API_URL}/${task.id}`, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(task)
+                    });
+                    loadTasks();
+                }
+            };
+
+            // --- LÓGICA DE MARCAR SUBTAREFA COMO FEITA ---
+            li.querySelectorAll('.sub-check').forEach(checkbox => {
+                checkbox.addEventListener('change', async (e) => {
+                    const index = e.target.dataset.index;
+                    task.subTasks[index].done = e.target.checked;
+
+                    await fetch(`${API_URL}/${task.id}`, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(task)
+                    });
+                    // Não precisa de loadTasks() aqui para não fechar o painel na cara do usuário
+                });
+            });
+
+            taskList.appendChild(li)
         });
     } catch (error) { console.error("Erro ao carregar tarefas:", error); }
 }
@@ -330,6 +468,9 @@ async function loadTasks() {
 // SALVAR NOVA TAREFA
 btnAddTask?.addEventListener('click', async () => {
     const taskText = inputTask.value.trim();
+    const depSelect = document.getElementById('task-dependencies');
+    const selectedDeps = Array.from(depSelect.selectedOptions).map(opt => parseInt(opt.value));
+
     if(taskText !== "") {
         const newTask = {
             id: Math.floor(Math.random() * 10000),
@@ -339,6 +480,10 @@ btnAddTask?.addEventListener('click', async () => {
             energy: document.getElementById('task-energy').value,
             link: document.getElementById('task-link').value,
             date: document.getElementById('task-date').value,
+            urgent: document.getElementById('task-urgent').checked,
+            important: document.getElementById('task-important').checked,
+            someday: document.getElementById('task-someday').checked,
+            dependencies: selectedDeps,
             subTasks: []
         };
         await fetch(API_URL, {
@@ -347,6 +492,11 @@ btnAddTask?.addEventListener('click', async () => {
             body: JSON.stringify(newTask)
         });
         inputTask.value = "";
+        document.getElementById('task-urgent').checked = false;
+        document.getElementById('task-important').checked = false;
+        document.getElementById('task-someday').checked = false;
+        document.getElementById('task-dependencies').innerHTML = '';
+
         taskPanel.classList.remove('expanded');
         loadTasks();
     }
