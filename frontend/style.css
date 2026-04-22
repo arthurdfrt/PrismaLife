@@ -592,12 +592,6 @@ body {
     transform: scale(120%);
 }
 
-/* --- CORES E TAGS DOS SILOS --- */
-.task-item.faculdade { border-left: 5px solid #8b5cf6 !important; }
-.task-item.trabalho { border-left: 5px solid #f59e0b !important; }
-.task-item.saude { border-left: 5px solid #10b981 !important; }
-.task-item.projetos { border-left: 5px solid #3b82f6 !important; }
-
 .silo-tag {
     font-size: 10px;
     text-transform: uppercase;

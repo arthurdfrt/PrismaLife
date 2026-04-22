@@ -12,10 +12,6 @@ public class SiloController {
     private long nextID = 1;
 
     public SiloController() {
-        silos.add(new Silo("🎓 Faculdade", "faculdade", "#8b5cf6"));
-        silos.add(new Silo("💼 Trabalho", "trabalho", "#f59e0b"));
-        silos.add(new Silo("🍎 Saúde", "saude", "#10b981"));
-        nextID = 4;
     }
 
     @GetMapping

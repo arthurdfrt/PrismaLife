@@ -48,6 +48,7 @@ public class TaskController {
         for (Task task : tasks) {
             if (task.getId() == id) {
                 boolean justCompleted = !task.isDone() && updatedTask.isDone();
+                boolean justUnchecked = task.isDone() && !updatedTask.isDone();
 
                 task.setContent(updatedTask.getContent());
                 task.setDone(updatedTask.isDone());
@@ -63,21 +64,31 @@ public class TaskController {
                 Map<String, Object> response = new HashMap<>();
                 response.put("task", task);
 
+                int xpAmount = 0;
                 if (justCompleted) {
-                    int xp = task.claimXp();
+                    xpAmount = task.claimXp();
+                } else if (justUnchecked) {
+                    xpAmount = -task.claimXp();
+                }
+
+                if (xpAmount != 0) {
                     String siloTitle = task.getSilo();
 
-                    totalXP += xp;
+                    totalXP += xpAmount;
+                    if (totalXP < 0) totalXP = 0;
+
                     if (siloTitle != null && !siloTitle.trim().isEmpty()) {
-                        siloXP.put(siloTitle, siloXP.getOrDefault(siloTitle, 0) + xp);
+                        int currentSiloXp = siloXP.getOrDefault(siloTitle, 0);
+                        int newSiloXp = currentSiloXp + xpAmount;
+                        if (newSiloXp < 0) newSiloXp = 0; // Proteção do silo
+                        siloXP.put(siloTitle, newSiloXp);
                     }
-                    response.put("xpGained", xp);
+                    response.put("xpGained", xpAmount);
                     response.put("siloAffected", task.getSilo());
                 } else {
                     response.put("xpGained", 0);
                     response.put("siloAffected", null);
                 }
-
                 return ResponseEntity.ok(response);
             }
         }

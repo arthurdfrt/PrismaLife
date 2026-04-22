@@ -78,27 +78,35 @@ function updateRadarChart() {
 }
 
 // --- SISTEMA DE XP ---
+// --- SISTEMA DE XP ---
 function addXP(amount, siloId) {
-    if (amount <= 0) return;
+    if (amount === 0) return; // Agora permite números negativos!
 
     totalXP += amount;
+    if (totalXP < 0) totalXP = 0; // Evita nível/xp negativo
 
     if (siloId && siloId !== "") {
         if (!siloXP[siloId]) siloXP[siloId] = 0;
         siloXP[siloId] += amount;
+        if (siloXP[siloId] < 0) siloXP[siloId] = 0;
     }
 
     const currentLevel = Math.floor(totalXP / 100) + 1;
     document.getElementById('xp-counter').textContent = totalXP;
     document.getElementById('user-level').textContent = currentLevel;
 
-    const statsCard = document.getElementById('user-stats-card');
-    if (statsCard) {
-        statsCard.classList.add('xp-glow');
-        setTimeout(() => statsCard.classList.remove('xp-glow'), 400);
+    // Faz o efeito de brilho SÓ se for um ganho positivo
+    if (amount > 0) {
+        const statsCard = document.getElementById('user-stats-card');
+        if (statsCard) {
+            statsCard.classList.add('xp-glow');
+            setTimeout(() => statsCard.classList.remove('xp-glow'), 400);
+        }
+        console.log(`✨ +${amount} XP! Total: ${totalXP} | Level: ${currentLevel}`);
+    } else {
+        console.log(`📉 ${amount} XP (Tarefa desmarcada). Total: ${totalXP}`);
     }
 
-    console.log(`✨ +${amount} XP! Total: ${totalXP} | Level: ${currentLevel}`);
     updateRadarChart();
 }
 
@@ -416,7 +424,11 @@ async function loadTasks() {
                         body: JSON.stringify({ ...task, done: isChecked })
                     });
                     const data = await response.json();
-                    if (data.xpGained > 0) addXP(data.xpGained, data.siloAffected);
+
+                    // MUDANÇA AQUI: Tira o "> 0" e deixa apenas "!= 0"
+                    if (data.xpGained !== 0 && data.xpGained !== undefined) {
+                        addXP(data.xpGained, data.siloAffected);
+                    }
                     loadTasks();
                 } catch (err) { e.target.checked = !isChecked; }
             });
