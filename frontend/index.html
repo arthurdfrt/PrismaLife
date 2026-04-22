@@ -13,7 +13,14 @@
     <aside class="sidebar">
         <div class="sidebar-header">
             <h1>💎 PrismaLife</h1>
-            <p>Nível 1 - Iniciante</p>
+            <div class="user-stats-card" id="user-stats-card">
+                <div class="user-level-text">
+                    • Nv. <span id="user-level">1</span>
+                </div>
+                <div class="user-xp-text">
+                    ✨ <span id="xp-counter">0</span> XP
+                </div>
+            </div>
         </div>
 
         <nav class="sidebar-menu">
@@ -52,6 +59,11 @@
             <header class="content-header">
                 <h2>Painel de Controle</h2>
                 <p>O que vamos conquistar hoje?</p>
+                <div id="dashboard-header" class="dashboard-header" style="display: none;">
+                    <div class="chart-wrapper">
+                        <canvas id="lifeRadarChart"></canvas>
+                    </div>
+                </div>
             </header>
 
             <div class="task-board">
@@ -110,6 +122,8 @@
                         <button id="btn-add-task" class="btn-primary">Adicionar Tarefa</button>
                     </div>
                 </div> </div> </div> </main>
-</div> <script src="app.js"></script>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="app.js"></script>
 </body>
 </html>
