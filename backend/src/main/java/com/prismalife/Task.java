@@ -28,6 +28,23 @@ public class Task {
         this.energy = energy;
     }
 
+    ////////////////// XP Logic //////////////////
+    public int claimXp() {
+        RewardSystem reward;
+        switch (this.energy.toLowerCase()) {
+            case "high":
+                reward = new HighEnergyReward();
+                break;
+            case "medium":
+                reward = new MediumEnergyReward();
+                break;
+            default:
+                reward = new LowEnergyReward();
+                break;
+        }
+        return reward.calculate();
+    }
+
     ///////////////// Getters ///////////////////
 
     public int getId() {

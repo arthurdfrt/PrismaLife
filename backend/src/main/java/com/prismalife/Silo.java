@@ -5,6 +5,7 @@ public class Silo {
     private String name;
     private String siloTitle;
     private String color;
+    private int xp = 0;
 
     public Silo() {
 
@@ -14,6 +15,10 @@ public class Silo {
         this.name = name;
         this.siloTitle = siloTitle;
         this.color = color;
+    }
+
+    public void addXp(int amount) {
+        this.xp += amount;
     }
 
     /// ------- Getters ------- ///
@@ -31,6 +36,9 @@ public class Silo {
     public String getColor() {
         return color;
     }
+    public int getXp() {
+        return xp;
+    }
 
     /// ------ Setters ------ ///
     public void setId(long id) {
@@ -46,5 +54,9 @@ public class Silo {
 
     public void setColor(String color) {
         this.color = color;
+    }
+
+    public void setXp(int xp) {
+        this.xp = xp;
     }
 }
