@@ -1,25 +1,41 @@
 console.log("PrismaLife Web Inicializado! 💎");
 
 // --- CONFIGURAÇÃO GLOBAL ---
-const API_URL = 'http://localhost:8080/api/tasks';
+const API_URL       = 'http://localhost:8080/api/tasks';
 const API_SILOS_URL = 'http://localhost:8080/api/silos';
+const API_USERS_URL = 'http://localhost:8080/api/users';
+
+// --- SESSÃO DO USUÁRIO ---
+// Lê o ID salvo pelo login/registro. Se não existir, redireciona para o login.
+const CURRENT_USER_ID = localStorage.getItem('prismalife_user_id');
+const CURRENT_USER_NAME = localStorage.getItem('prismalife_user_name');
+
+if (!CURRENT_USER_ID) {
+    window.location.href = 'login.html';
+}
+
+// Exibe o nome do usuário na sidebar se houver um elemento para isso
+const userGreeting = document.getElementById('user-greeting');
+if (userGreeting && CURRENT_USER_NAME) {
+    userGreeting.textContent = CURRENT_USER_NAME;
+}
 
 // Elementos do DOM
 const btnAddTask = document.getElementById('btn-add-task');
-const inputTask = document.getElementById('new-task-input');
-const taskList = document.getElementById('task-list');
-const taskPanel = document.getElementById('task-panel');
-const btnCancel = document.getElementById('btn-cancel');
+const inputTask  = document.getElementById('new-task-input');
+const taskList   = document.getElementById('task-list');
+const taskPanel  = document.getElementById('task-panel');
+const btnCancel  = document.getElementById('btn-cancel');
 
 // VARIÁVEIS DE ESTADO
-let totalXP = 0;
-let siloXP = {};
-let lifeChart = null;
-let activeFilter = 'all'
-let filterUrgent = false;
+let totalXP         = 0;
+let siloXP          = {};
+let lifeChart       = null;
+let activeFilter    = 'all';
+let filterUrgent    = false;
 let filterImportant = false;
 
-// --- SISTEMA DE GRÁFICO (RADAR) ---
+// --- SISTEMA DE GRÁFICO (RADAR) --- (sem alterações)
 function updateRadarChart() {
     const header = document.getElementById('dashboard-header');
     if (activeFilter !== 'all') {
@@ -32,12 +48,10 @@ function updateRadarChart() {
     if (!canvas) return;
 
     const ctx = canvas.getContext('2d');
-    const labels = Object.keys(siloXP);
+    const labels     = Object.keys(siloXP);
     const dataValues = Object.values(siloXP);
 
-    if (lifeChart) {
-        lifeChart.destroy();
-    }
+    if (lifeChart) lifeChart.destroy();
 
     if (typeof Chart !== 'undefined') {
         lifeChart = new Chart(ctx, {
@@ -56,18 +70,13 @@ function updateRadarChart() {
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
-                layout: {
-                    padding: 20
-                },
+                layout: { padding: 20 },
                 scales: {
                     r: {
                         angleLines: { color: '#556387' },
                         grid: { color: '#556387' },
                         pointLabels: { color: '#cbd5e1', font: { size: 14 } },
-                        ticks: {
-                            display: false,
-                            stepSize: 20
-                        },
+                        ticks: { display: false, stepSize: 20 },
                         suggestedMin: 0
                     }
                 },
@@ -78,11 +87,12 @@ function updateRadarChart() {
 }
 
 // --- SISTEMA DE XP ---
-function addXP(amount, siloId) {
-    if (amount === 0) return; // Agora permite números negativos!
+// Atualiza a UI localmente e sincroniza o novo total com o backend do usuário.
+async function addXP(amount, siloId) {
+    if (amount === 0) return;
 
     totalXP += amount;
-    if (totalXP < 0) totalXP = 0; // Evita nível/xp negativo
+    if (totalXP < 0) totalXP = 0;
 
     if (siloId && siloId !== "") {
         if (!siloXP[siloId]) siloXP[siloId] = 0;
@@ -94,7 +104,6 @@ function addXP(amount, siloId) {
     document.getElementById('xp-counter').textContent = totalXP;
     document.getElementById('user-level').textContent = currentLevel;
 
-    // Faz o efeito de brilho SÓ se for um ganho positivo
     if (amount > 0) {
         const statsCard = document.getElementById('user-stats-card');
         if (statsCard) {
@@ -106,26 +115,43 @@ function addXP(amount, siloId) {
         console.log(`📉 ${amount} XP (Tarefa desmarcada). Total: ${totalXP}`);
     }
 
+    // Sincroniza o XP com o backend do usuário
+    try {
+        await fetch(`${API_USERS_URL}/${CURRENT_USER_ID}/xp`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ amount })
+        });
+    } catch (err) {
+        console.warn('Não foi possível sincronizar XP com o servidor:', err);
+    }
+
     updateRadarChart();
 }
 
 // --- SINCRONIZAÇÃO COM SERVIDOR ---
+// Carrega XP e siloXP do TaskController (fonte dos dados de progresso por silo)
+// e o level/xp total do UserController (fonte do perfil do usuário).
 async function loadStats() {
     try {
-        const response = await fetch(`${API_URL}/stats`);
-        const stats = await response.json();
+        // Stats gerais de tarefas (siloXP para o radar)
+        const taskStatsRes = await fetch(`${API_URL}/stats`);
+        const taskStats    = await taskStatsRes.json();
+        siloXP = taskStats.siloXP || {};
 
-        totalXP = stats.totalXP || 0;
-        siloXP = stats.siloXP || {};
+        // Stats do usuário logado (XP total e nível persistido)
+        const userStatsRes = await fetch(`${API_USERS_URL}/${CURRENT_USER_ID}/stats`);
+        const userStats    = await userStatsRes.json();
+        totalXP = userStats.totalXP || 0;
 
         const currentLevel = Math.floor(totalXP / 100) + 1;
         document.getElementById('xp-counter').textContent = totalXP;
         document.getElementById('user-level').textContent = currentLevel;
 
-        console.log("📊 Stats loaded:", stats);
+        console.log("📊 Stats carregadas:", { totalXP, siloXP });
         updateRadarChart();
     } catch (error) {
-        console.error("Error loading stats:", error);
+        console.error("Erro ao carregar stats:", error);
     }
 }
 
@@ -136,10 +162,10 @@ function formatData(dataString) {
     return `${dia}/${mes}/${ano}`;
 }
 
-// --- SILOS ---
-const btnAddSilo = document.getElementById('btn-add-silo');
-const newSiloForm = document.getElementById('new-silo-form');
-const btnSaveSilo = document.getElementById('btn-save-silo');
+// --- SILOS --- (sem alterações)
+const btnAddSilo    = document.getElementById('btn-add-silo');
+const newSiloForm   = document.getElementById('new-silo-form');
+const btnSaveSilo   = document.getElementById('btn-save-silo');
 const btnCancelSilo = document.getElementById('btn-cancel-silo');
 const inputSiloName = document.getElementById('new-silo-input');
 const silosContainer = document.getElementById('silos-container');
@@ -153,16 +179,19 @@ document.getElementById('task-dependencies')?.addEventListener('mousedown', func
         this.dispatchEvent(new Event('change'));
     }
 });
+
 document.getElementById('toggle-urgent').addEventListener('click', function() {
     filterUrgent = !filterUrgent;
     this.classList.toggle('active');
     loadTasks();
 });
+
 document.getElementById('toggle-important').addEventListener('click', function() {
     filterImportant = !filterImportant;
     this.classList.toggle('active');
     loadTasks();
 });
+
 document.querySelector('.btn-clear-filters')?.addEventListener('click', () => {
     filterUrgent = false;
     filterImportant = false;
@@ -170,7 +199,6 @@ document.querySelector('.btn-clear-filters')?.addEventListener('click', () => {
     document.getElementById('toggle-important').classList.remove('active');
     loadTasks();
 });
-
 
 btnAddSilo?.addEventListener('click', (e) => {
     e.preventDefault();
@@ -186,11 +214,11 @@ btnCancelSilo?.addEventListener('click', (e) => {
 
 btnSaveSilo?.addEventListener('click', async (e) => {
     e.preventDefault();
-    const siloText = inputSiloName.value.trim();
+    const siloText  = inputSiloName.value.trim();
     const siloColor = document.getElementById('new-silo-color').value;
 
     if (siloText !== "") {
-        const siloId = siloText.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, '-');
+        const siloId   = siloText.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, '-');
         const novoSilo = { name: siloText, siloTitle: siloId, color: siloColor };
 
         try {
@@ -206,25 +234,19 @@ btnSaveSilo?.addEventListener('click', async (e) => {
     }
 });
 
-// --- UI TAREFAS (EXPANDIR PAINEL E CARREGAR DEPENDÊNCIAS) ---
+// --- UI TAREFAS (sem alterações) ---
 taskPanel?.addEventListener('click', async (e) => {
-    // Só executa se o painel não estiver aberto ainda
     if (!taskPanel.classList.contains('expanded')) {
         taskPanel.classList.add('expanded');
         inputTask.focus();
 
-        // --- BUSCAR TAREFAS PARA O SELETOR ---
         try {
             const response = await fetch(API_URL);
             const allTasks = await response.json();
             const depSelect = document.getElementById('task-dependencies');
 
             if (depSelect) {
-                // Limpa o seletor antes de preencher
                 depSelect.innerHTML = '';
-
-                // Filtra para não mostrar tarefas que já estão prontas
-                // e nem as que estão no Someday
                 const validTasks = allTasks.filter(t => !t.done && !t.someday);
 
                 if (validTasks.length === 0) {
@@ -247,7 +269,7 @@ btnCancel?.addEventListener('click', (e) => {
     inputTask.value = "";
 });
 
-// --- SIDEBAR FILTERS ---
+// --- SIDEBAR FILTERS (sem alterações) ---
 const sidebarMenu = document.querySelector('.sidebar-menu');
 sidebarMenu?.addEventListener('click', (e) => {
     const filterBtn = e.target.closest('.filter-btn');
@@ -275,7 +297,7 @@ sidebarMenu?.addEventListener('click', (e) => {
 async function loadSilos() {
     try {
         const response = await fetch(API_SILOS_URL);
-        const silos = await response.json();
+        const silos    = await response.json();
         silosContainer.innerHTML = '';
         taskSiloSelect.innerHTML = '<option value="">Sem Silo (Geral)</option>';
 
@@ -313,8 +335,7 @@ async function loadTasks() {
             } else {
                 const activeSiloBtn = document.querySelector(`.filter-btn[data-silo="${activeFilter}"]`);
                 if (activeSiloBtn) {
-                    const siloName = activeSiloBtn.textContent.replace('●', '').trim();
-                    mainTitle.innerHTML = `${siloName}`;
+                    mainTitle.innerHTML = activeSiloBtn.textContent.replace('●', '').trim();
                 }
             }
         }
@@ -330,7 +351,7 @@ async function loadTasks() {
         }
 
         // Filtros Eisenhower
-        if (filterUrgent) tasks = tasks.filter(t => t.urgent === true);
+        if (filterUrgent)    tasks = tasks.filter(t => t.urgent === true);
         if (filterImportant) tasks = tasks.filter(t => t.important === true);
 
         taskList.innerHTML = '';
@@ -347,11 +368,13 @@ async function loadTasks() {
             if (isBlocked) li.classList.add('is-blocked');
 
             let energyHTML = '';
-            if (task.energy === 'low') energyHTML = '<span class="energy-badge energy-low">⚡ Baixa</span>';
+            if (task.energy === 'low')    energyHTML = '<span class="energy-badge energy-low">⚡ Baixa</span>';
             else if (task.energy === 'medium') energyHTML = '<span class="energy-badge energy-medium">⚡⚡ Média</span>';
-            else if (task.energy === 'high') energyHTML = '<span class="energy-badge energy-high">⚡⚡⚡ Alta</span>';
+            else if (task.energy === 'high')   energyHTML = '<span class="energy-badge energy-high">⚡⚡⚡ Alta</span>';
 
-            const siloTagHTML = activeFilter === 'all' ? `<span class="silo-tag">${task.silo || 'Geral'}</span>` : '';
+            const siloTagHTML = activeFilter === 'all'
+                ? `<span class="silo-tag">${task.silo || 'Geral'}</span>`
+                : '';
 
             li.innerHTML = `
                 <div class="task-header">
@@ -398,19 +421,21 @@ async function loadTasks() {
 
             // Eventos dos painéis
             const expandedContent = li.querySelector('.task-expanded-content');
-            const descPanel = li.querySelector('.desc-panel');
-            const detailsPanel = li.querySelector('.details-panel');
-            const subtasksPanel = li.querySelector('.subtasks-panel');
+            const descPanel       = li.querySelector('.desc-panel');
+            const detailsPanel    = li.querySelector('.details-panel');
+            const subtasksPanel   = li.querySelector('.subtasks-panel');
 
             const togglePanel = (panel) => {
                 const isVisible = panel.style.display === 'block';
                 [descPanel, detailsPanel, subtasksPanel].forEach(p => p.style.display = 'none');
                 panel.style.display = isVisible ? 'none' : 'block';
-                isVisible ? expandedContent.classList.remove('show') : expandedContent.classList.add('show');
+                isVisible
+                    ? expandedContent.classList.remove('show')
+                    : expandedContent.classList.add('show');
             };
 
-            li.querySelector('.btn-desc').onclick = () => togglePanel(descPanel);
-            li.querySelector('.btn-details').onclick = () => togglePanel(detailsPanel);
+            li.querySelector('.btn-desc').onclick     = () => togglePanel(descPanel);
+            li.querySelector('.btn-details').onclick  = () => togglePanel(detailsPanel);
             li.querySelector('.btn-subtasks').onclick = () => togglePanel(subtasksPanel);
 
             li.querySelector('.checkbox-done').addEventListener('change', async (e) => {
@@ -424,7 +449,8 @@ async function loadTasks() {
                     const data = await response.json();
 
                     if (data.xpGained !== 0 && data.xpGained !== undefined) {
-                        addXP(data.xpGained, data.siloAffected);
+                        // addXP já cuida de atualizar a UI e sincronizar com /api/users/{id}/xp
+                        await addXP(data.xpGained, data.siloAffected);
                     }
                     loadTasks();
                 } catch (err) { e.target.checked = !isChecked; }
@@ -435,9 +461,8 @@ async function loadTasks() {
                 loadTasks();
             };
 
-// --- LÓGICA DE ADICIONAR SUBTAREFA ---
             const btnAddSub = li.querySelector('.btn-add-sub-inline');
-            const inputSub = li.querySelector('.new-subtask-text');
+            const inputSub  = li.querySelector('.new-subtask-text');
 
             btnAddSub.onclick = async () => {
                 const subText = inputSub.value.trim();
@@ -454,7 +479,6 @@ async function loadTasks() {
                 }
             };
 
-            // --- LÓGICA DE MARCAR SUBTAREFA COMO FEITA ---
             li.querySelectorAll('.sub-check').forEach(checkbox => {
                 checkbox.addEventListener('change', async (e) => {
                     const index = e.target.dataset.index;
@@ -465,45 +489,46 @@ async function loadTasks() {
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify(task)
                     });
-                    // Não precisa de loadTasks() aqui para não fechar o painel na cara do usuário
                 });
             });
 
-            taskList.appendChild(li)
+            taskList.appendChild(li);
         });
     } catch (error) { console.error("Erro ao carregar tarefas:", error); }
 }
 
-// SALVAR NOVA TAREFA
+// SALVAR NOVA TAREFA (sem alterações)
 btnAddTask?.addEventListener('click', async () => {
-    const taskText = inputTask.value.trim();
+    const taskText  = inputTask.value.trim();
     const depSelect = document.getElementById('task-dependencies');
     const selectedDeps = Array.from(depSelect.selectedOptions).map(opt => parseInt(opt.value));
 
-    if(taskText !== "") {
+    if (taskText !== "") {
         const newTask = {
-            id: Math.floor(Math.random() * 10000),
-            content: taskText,
-            done: false,
-            silo: document.getElementById('task-silo').value,
-            energy: document.getElementById('task-energy').value,
-            link: document.getElementById('task-link').value,
-            date: document.getElementById('task-date').value,
-            urgent: document.getElementById('task-urgent').checked,
-            important: document.getElementById('task-important').checked,
-            someday: document.getElementById('task-someday').checked,
+            id:         Math.floor(Math.random() * 10000),
+            content:    taskText,
+            done:       false,
+            silo:       document.getElementById('task-silo').value,
+            energy:     document.getElementById('task-energy').value,
+            link:       document.getElementById('task-link').value,
+            date:       document.getElementById('task-date').value,
+            urgent:     document.getElementById('task-urgent').checked,
+            important:  document.getElementById('task-important').checked,
+            someday:    document.getElementById('task-someday').checked,
             dependencies: selectedDeps,
-            subTasks: []
+            subTasks:   []
         };
+
         await fetch(API_URL, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(newTask)
         });
+
         inputTask.value = "";
-        document.getElementById('task-urgent').checked = false;
+        document.getElementById('task-urgent').checked    = false;
         document.getElementById('task-important').checked = false;
-        document.getElementById('task-someday').checked = false;
+        document.getElementById('task-someday').checked   = false;
         document.getElementById('task-dependencies').innerHTML = '';
 
         taskPanel.classList.remove('expanded');
